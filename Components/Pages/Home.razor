@@ -1,0 +1,77 @@
+﻿@page "/"
+@using BlazorSqlitePOC.Data
+@using BlazorSqlitePOC.Models
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext DbContext
+
+@rendermode InteractiveServer
+
+<div class="container">
+    <div class="details-view">
+        <h3 style="text-align:center">Student Details</h3>
+    </div>
+    <div class="grid-view">
+        <h3>Records</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>University</th>
+                    <th>Faculty</th>
+                    <th>Department</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var record in students)
+                {
+                    <tr class="@GetRowClass(record)" @onclick="() => SelectRecord(record)">
+                        <td>@record.Id</td>
+                        <td>@record.Name</td>
+                        <td>@record.UniversityName</td>
+                        <td>@record.Faculty</td>
+                        <td>@record.Department</td>
+                        <td>@record.Email</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Right Container for Record Details -->
+    <div class="details-view">
+        @if (selectedStudent != null)
+        {
+            <h3>Record Details</h3>
+            <div>
+                <p><strong>Id:</strong> @selectedStudent.Id</p>
+                <p><strong>Name:</strong> @selectedStudent.Name</p>
+                <p><strong>University:</strong> @selectedStudent.UniversityName</p>
+                <p><strong>Faculty:</strong> @selectedStudent.Faculty</p>
+                <p><strong>Department:</strong> @selectedStudent.Department</p>
+                <p><strong>Email:</strong> @selectedStudent.Email</p>
+            </div>
+        }
+    </div>
+</div>
+@code {
+    private List<Student> students = new List<Student>();
+    private Student selectedStudent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        students = await DbContext.Students.ToListAsync();
+    }
+
+    private void SelectRecord(Student record)
+    {
+        selectedStudent = record; 
+        StateHasChanged(); // Ensure the UI is updated
+    }
+
+    private string GetRowClass(Student record)
+    {
+        return selectedStudent == record ? "selected-row" : string.Empty;
+    }
+}
